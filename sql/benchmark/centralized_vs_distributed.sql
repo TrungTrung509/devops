@@ -1,0 +1,51 @@
+
+-- BENCHMARK: SO SANH TẬP TRUNG vs PHÂN TÁN
+--
+-- MUC TIEU:
+-- So sanh hieu nang giua mo hinh CSDL tap trung (1 PostgreSQL)
+-- va mo hinh CSDL phan tan (3 PostgreSQL + FDW).
+--
+-- MO TA CAC CAP QUERY:
+--
+-- CAP 1: Truy van local - lay danh sach lop hoc phan theo co so HADONG
+--   - Tap trung: query trong 1 DB voi WHERE MaCoSo
+--   - Phan tan: query truc tiep tai site HADONG
+--
+-- CAP 2: Thong ke toan truong - dem sinh vien theo co so
+--   - Tap trung: GROUP BY tren 1 DB
+--   - Phan tan: su dung view FDW (vw_sinhvien_toantruong)
+--
+-- CAP 3: Aggregate toan truong - ty le lap day lop hoc phan
+--   - Tap trung: GROUP BY tren 1 DB
+--   - Phan tan: su dung view FDW (vw_lophocphan_toantruong)
+--
+-- CAP 4: Join toan truong - sinh vien dang ky cheo co so
+--   - Tap trung: JOIN tren 1 DB
+--   - Phan tan: JOIN qua view FDW (vw_*_toantruong)
+--
+-- CAP 5: Top N aggregate - hoc phan nhieu SV nhat
+--   - Tap trung: JOIN + GROUP BY tren 1 DB
+--   - Phan tan: JOIN view FDW voi bang replicated
+--
+-- CAP 6: Kiem tra si so lop
+--   - Tap trung: COUNT JOIN tren 1 DB
+--   - Phan tan: COUNT JOIN truc tiep tai site HADONG
+--
+-- CAP 7: Tong hop hoc ky
+--   - Tap trung: JOIN tren 1 DB
+--   - Phan tan: JOIN view FDW voi bang replicated
+--
+-- Y KIEN VE HIEU NANG:
+-- - Local query: Phan tan co the nhanh hon vi du lieu nam dung site
+-- - Global query: Tap trung thuong nhanh hon vi khong can FDW/network
+-- - FDW overhead: Truy van phan tan global phai lay du lieu tu nhieu site
+
+-- Chi danh sach ten cac cap query de reference
+--
+-- CAP 1: Q1_LOCAL_LOPHP
+-- CAP 2: Q2_SV_THEO_COSO
+-- CAP 3: Q3_TY_LE_LOPDAY
+-- CAP 4: Q4_DK_CHEO_COSO
+-- CAP 5: Q5_TOP_HP_NHIU_SV
+-- CAP 6: Q6_KIEM_TRA_SISO
+-- CAP 7: Q7_TONG_HOP_HOCKY

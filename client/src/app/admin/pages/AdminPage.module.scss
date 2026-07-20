@@ -1,0 +1,39 @@
+// Shared Admin Page Styles
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins/responsive' as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pageTitle {
+  margin-bottom: 4px !important;
+  font-weight: 600 !important;
+}
+
+.tableCard {
+  border-radius: $radius-lg !important;
+  overflow: hidden;
+
+  :global(.ant-table-thead > tr > th) {
+    background: #fafafa !important;
+  }
+}
+
+.filterCard {
+  border-radius: $radius-lg !important;
+
+  :global(.ant-card-body) {
+    padding: 16px;
+  }
+}

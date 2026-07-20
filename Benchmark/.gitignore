@@ -1,0 +1,14 @@
+# Python cached files
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.pytest_cache/
+
+# Log files
+*.log
+**/*.log
+
+# Environment/Docker files
+.env
+.env.*

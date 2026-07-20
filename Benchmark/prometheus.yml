@@ -1,0 +1,39 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  # Cào dữ liệu từ cụm CƠ SỞ
+  - job_name: 'postgres_coso'
+    static_configs:
+      - targets: ['exporter_hd:9187']
+        labels: { site: 'HADONG' }
+      - targets: ['exporter_hl:9187']
+        labels: { site: 'HOALAC' }
+      - targets: ['exporter_nt:9187']
+        labels: { site: 'NGOCTRUC' }
+
+  # Cào dữ liệu từ cụm KHOA
+  - job_name: 'postgres_khoa'
+    static_configs:
+      - targets: ['exporter_cntt:9187']
+        labels: { site: 'CNTT' }
+      - targets: ['exporter_cb:9187']
+        labels: { site: 'CB' }
+      - targets: ['exporter_nn:9187']
+        labels: { site: 'NN' }
+      - targets: ['exporter_kt:9187']
+        labels: { site: 'KT' }
+      - targets: ['exporter_dt:9187']
+        labels: { site: 'DT' }
+
+  # Cào dữ liệu từ backend CoSo
+  - job_name: 'backend_coso'
+    static_configs:
+      - targets: ['backend_coso:8000']
+
+  # Cào dữ liệu từ backend Khoa
+  - job_name: 'backend_khoa'
+    static_configs:
+      - targets: ['backend_khoa:8000']
+

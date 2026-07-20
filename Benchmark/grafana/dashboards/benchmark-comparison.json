@@ -1,0 +1,404 @@
+{
+  "uid": "db-benchmark-comparison",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "title": "Bảng So Sánh Tổng Hợp — Cơ Sở vs Khoa",
+      "description": "Chênh lệch (%) = (Khoa − Cơ sở) ÷ Cơ sở. Thông lượng: âm = Khoa kém hơn. Lỗi & Độ trễ: dương = Khoa tệ hơn.",
+      "type": "table",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "label_replace(sum by (app) (increase(benchmark_http_requests_total{app=\"coso\"}[$__range])), \"metric\", \"1. Tổng số yêu cầu\", \"\", \"\")",
+          "refId": "A"
+        },
+        {
+          "expr": "label_replace(sum by (app) (increase(benchmark_http_requests_total{app=\"khoa\"}[$__range])), \"metric\", \"1. Tổng số yêu cầu\", \"\", \"\")",
+          "refId": "B"
+        },
+        {
+          "expr": "label_replace(sum by (app) (increase(benchmark_http_requests_total{status=~\"200|201\",app=\"coso\"}[$__range])), \"metric\", \"2. Số yêu cầu thành công\", \"\", \"\")",
+          "refId": "C"
+        },
+        {
+          "expr": "label_replace(sum by (app) (increase(benchmark_http_requests_total{status=~\"200|201\",app=\"khoa\"}[$__range])), \"metric\", \"2. Số yêu cầu thành công\", \"\", \"\")",
+          "refId": "D"
+        },
+        {
+          "expr": "label_replace((sum by (app) (increase(benchmark_http_requests_total{status=~\"5.*\",app=\"coso\"}[$__range])) or (sum by (app) (increase(benchmark_http_requests_total{app=\"coso\"}[$__range])) * 0)), \"metric\", \"3. Số yêu cầu thất bại (Lỗi)\", \"\", \"\")",
+          "refId": "E"
+        },
+        {
+          "expr": "label_replace((sum by (app) (increase(benchmark_http_requests_total{status=~\"5.*\",app=\"khoa\"}[$__range])) or (sum by (app) (increase(benchmark_http_requests_total{app=\"khoa\"}[$__range])) * 0)), \"metric\", \"3. Số yêu cầu thất bại (Lỗi)\", \"\", \"\")",
+          "refId": "F"
+        },
+        {
+          "expr": "label_replace((sum by (app) (increase(benchmark_http_requests_total{status=~\"5.*\",app=\"coso\"}[$__range])) or (sum by (app) (increase(benchmark_http_requests_total{app=\"coso\"}[$__range])) * 0)) / sum by (app) (increase(benchmark_http_requests_total{app=\"coso\"}[$__range])) * 100, \"metric\", \"4. Tỷ lệ lỗi (%)\", \"\", \"\")",
+          "refId": "G"
+        },
+        {
+          "expr": "label_replace((sum by (app) (increase(benchmark_http_requests_total{status=~\"5.*\",app=\"khoa\"}[$__range])) or (sum by (app) (increase(benchmark_http_requests_total{app=\"khoa\"}[$__range])) * 0)) / sum by (app) (increase(benchmark_http_requests_total{app=\"khoa\"}[$__range])) * 100, \"metric\", \"4. Tỷ lệ lỗi (%)\", \"\", \"\")",
+          "refId": "H"
+        },
+        {
+          "expr": "label_replace(max_over_time(sum by (app) (rate(benchmark_http_requests_total{app=\"coso\"}[30s]))[$__range:]), \"metric\", \"5. Tốc độ xử lý tối đa (yêu cầu/giây)\", \"\", \"\")",
+          "refId": "I"
+        },
+        {
+          "expr": "label_replace(max_over_time(sum by (app) (rate(benchmark_http_requests_total{app=\"khoa\"}[30s]))[$__range:]), \"metric\", \"5. Tốc độ xử lý tối đa (yêu cầu/giây)\", \"\", \"\")",
+          "refId": "J"
+        },
+        {
+          "expr": "label_replace(avg_over_time((sum by (app) (rate(benchmark_http_request_duration_seconds_sum{app=\"coso\"}[30s])) / sum by (app) (rate(benchmark_http_request_duration_seconds_count{app=\"coso\"}[30s])))[$__range:]), \"metric\", \"6. Thời gian phản hồi trung bình (ms)\", \"\", \"\") * 1000",
+          "refId": "K"
+        },
+        {
+          "expr": "label_replace(avg_over_time((sum by (app) (rate(benchmark_http_request_duration_seconds_sum{app=\"khoa\"}[30s])) / sum by (app) (rate(benchmark_http_request_duration_seconds_count{app=\"khoa\"}[30s])))[$__range:]), \"metric\", \"6. Thời gian phản hồi trung bình (ms)\", \"\", \"\") * 1000",
+          "refId": "L"
+        },
+        {
+          "expr": "label_replace(avg_over_time((sum by (app) (rate(benchmark_conflict_check_duration_seconds_sum{app=\"coso\"}[30s])) / sum by (app) (rate(benchmark_conflict_check_duration_seconds_count{app=\"coso\"}[30s])))[$__range:]), \"metric\", \"7. Thời gian kiểm tra trùng lịch (ms)\", \"\", \"\") * 1000",
+          "refId": "O"
+        },
+        {
+          "expr": "label_replace(avg_over_time((sum by (app) (rate(benchmark_conflict_check_duration_seconds_sum{app=\"khoa\"}[30s])) / sum by (app) (rate(benchmark_conflict_check_duration_seconds_count{app=\"khoa\"}[30s])))[$__range:]), \"metric\", \"7. Thời gian kiểm tra trùng lịch (ms)\", \"\", \"\") * 1000",
+          "refId": "P"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Tiêu chí" },
+            "properties": [{ "id": "custom.width", "value": 310 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Cơ sở" },
+            "properties": [
+              { "id": "custom.align", "value": "right" },
+              { "id": "custom.width", "value": 140 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Khoa" },
+            "properties": [
+              { "id": "custom.align", "value": "right" },
+              { "id": "custom.width", "value": 140 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Chênh lệch (%)" },
+            "properties": [
+              { "id": "unit", "value": "percentunit" },
+              { "id": "custom.align", "value": "center" },
+              { "id": "custom.width", "value": 140 },
+              { "id": "custom.displayMode", "value": "color-text" },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 0.05 },
+                    { "color": "red", "value": 0.2 }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "cellHeight": "md",
+        "footer": { "show": false },
+        "showHeader": true
+      },
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "mode": "seriesToRows",
+            "reducers": ["last"]
+          }
+        },
+        {
+          "id": "extractFields",
+          "options": {
+            "source": "Metric",
+            "format": "labels",
+            "keepTime": false,
+            "replace": true
+          }
+        },
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": ["app"]
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "mode": "binary",
+            "binary": {
+              "left": "Last (app: khoa)",
+              "operator": "-",
+              "right": "Last (app: coso)"
+            },
+            "alias": "Diff_Abs"
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "mode": "binary",
+            "binary": {
+              "left": "Diff_Abs",
+              "operator": "/",
+              "right": "Last (app: coso)"
+            },
+            "alias": "Chênh lệch (%)"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": { "Diff_Abs": true },
+            "indexByName": {
+              "metric": 0,
+              "Last (app: coso)": 1,
+              "Last (app: khoa)": 2,
+              "Chênh lệch (%)": 3
+            },
+            "renameByName": {
+              "metric": "Tiêu chí",
+              "Last (app: coso)": "Cơ sở",
+              "Last (app: khoa)": "Khoa"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Tốc độ xử lý (Số yêu cầu/giây)",
+      "description": "Số lượng yêu cầu đăng ký thành công được hệ thống xử lý xong trong mỗi giây. Càng cao càng tốt.",
+      "type": "timeseries",
+      "minInterval": "5s",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(benchmark_http_requests_total{status=~\"200|201\",app=\"coso\"}[30s]))",
+          "legendFormat": "Cơ sở",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(benchmark_http_requests_total{status=~\"200|201\",app=\"khoa\"}[30s]))",
+          "legendFormat": "Khoa",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": { "lineWidth": 2, "fillOpacity": 10, "connectNulls": true },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Cơ sở" },
+            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Khoa" },
+            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Tỷ lệ đăng ký thành công (%)",
+      "description": "Tỷ lệ phần trăm các yêu cầu đăng ký thành công trên tổng số yêu cầu gửi lên. Càng cao hệ thống càng ổn định.",
+      "type": "timeseries",
+      "minInterval": "5s",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(benchmark_http_requests_total{status=~\"200|201\",app=\"coso\"}[30s])) / sum(rate(benchmark_http_requests_total{app=\"coso\"}[30s])) * 100",
+          "legendFormat": "Cơ sở",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(benchmark_http_requests_total{status=~\"200|201\",app=\"khoa\"}[30s])) / sum(rate(benchmark_http_requests_total{app=\"khoa\"}[30s])) * 100",
+          "legendFormat": "Khoa",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": { "lineWidth": 2, "fillOpacity": 10, "connectNulls": true },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Cơ sở" },
+            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Khoa" },
+            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Thời gian phản hồi trung bình (ms)",
+      "description": "Thời gian phản hồi trung bình của mỗi yêu cầu đăng ký môn học (tính bằng mili-giây). Càng thấp càng tốt.",
+      "type": "timeseries",
+      "minInterval": "5s",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 18 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(benchmark_http_request_duration_seconds_sum{app=\"coso\"}[30s])) / sum(rate(benchmark_http_request_duration_seconds_count{app=\"coso\"}[30s])) * 1000",
+          "legendFormat": "Cơ sở",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(benchmark_http_request_duration_seconds_sum{app=\"khoa\"}[30s])) / sum(rate(benchmark_http_request_duration_seconds_count{app=\"khoa\"}[30s])) * 1000",
+          "legendFormat": "Khoa",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "custom": { "lineWidth": 2, "fillOpacity": 5, "connectNulls": true },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Cơ sở" },
+            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Khoa" },
+            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "asc" }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Thời gian kiểm tra trùng lịch học (ms)",
+      "description": "Thời gian trung bình để kiểm tra trùng thời khóa biểu trước khi đăng ký. Đây là điểm khác biệt cốt lõi giữa 2 mô hình Cơ sở và Khoa. Càng thấp càng tốt.",
+      "type": "timeseries",
+      "minInterval": "5s",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 18 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(benchmark_conflict_check_duration_seconds_sum{app=\"coso\"}[30s])) / sum(rate(benchmark_conflict_check_duration_seconds_count{app=\"coso\"}[30s])) * 1000",
+          "legendFormat": "Cơ sở",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(benchmark_conflict_check_duration_seconds_sum{app=\"khoa\"}[30s])) / sum(rate(benchmark_conflict_check_duration_seconds_count{app=\"khoa\"}[30s])) * 1000",
+          "legendFormat": "Khoa",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "custom": { "lineWidth": 2, "fillOpacity": 10, "connectNulls": true },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Cơ sở" },
+            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Khoa" },
+            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "asc" }
+      }
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 41,
+  "tags": ["csdlpt", "benchmark"],
+  "time": { "from": "now-5m", "to": "now" },
+  "timezone": "browser",
+  "title": "So Sánh Hiệu Năng: Cơ Sở vs Khoa",
+  "version": 1
+}

@@ -1,0 +1,6 @@
+// Entry point for SCSS style system
+// Use @use in component SCSS files instead of @import
+
+// Component SCSS files should use:
+// @use '../styles/variables' as *;
+// @use '../styles/mixins/responsive' as *;

@@ -1,0 +1,231 @@
+version: "3.8"
+
+services:
+  # MONITORING
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: bench_prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - bench_network
+
+  grafana:
+    image: grafana/grafana:12.1.1
+    container_name: bench_grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - bench_network
+    depends_on:
+      - prometheus
+
+  # CỤM CƠ SỞ (COSO)
+  backend_coso:
+    build:
+      context: ./CoSo/app
+      dockerfile: Dockerfile
+    container_name: bench_backend_coso
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./CoSo/app:/app
+    networks:
+      - bench_network
+    environment:
+      - PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus_multiproc
+    entrypoint: >
+      sh -c "rm -rf /tmp/prometheus_multiproc && mkdir -p /tmp/prometheus_multiproc && uvicorn main:app --host 0.0.0.0 --port 8000 --workers 8"
+    restart: unless-stopped
+
+  postgres_hd:
+    image: postgres:15-alpine
+    container_name: bench_postgres_hd
+    environment:
+      POSTGRES_DB: db_hd
+      POSTGRES_USER: bench_user
+      POSTGRES_PASSWORD: bench_password
+    ports: ["5451:5432"]
+    networks: [bench_network]
+    command: postgres -c max_connections=300 -c shared_buffers=256MB
+
+  postgres_hl:
+    image: postgres:15-alpine
+    container_name: bench_postgres_hl
+    environment:
+      POSTGRES_DB: db_hl
+      POSTGRES_USER: bench_user
+      POSTGRES_PASSWORD: bench_password
+    ports: ["5452:5432"]
+    networks: [bench_network]
+    command: postgres -c max_connections=300 -c shared_buffers=256MB
+
+  postgres_nt:
+    image: postgres:15-alpine
+    container_name: bench_postgres_nt
+    environment:
+      POSTGRES_DB: db_nt
+      POSTGRES_USER: bench_user
+      POSTGRES_PASSWORD: bench_password
+    ports: ["5453:5432"]
+    networks: [bench_network]
+    command: postgres -c max_connections=300 -c shared_buffers=256MB
+
+  exporter_hd:
+    image: prometheuscommunity/postgres-exporter:v0.18.1
+    container_name: exporter_hd
+    environment:
+      DATA_SOURCE_URI: postgres_hd:5432/db_hd?sslmode=disable
+      DATA_SOURCE_USER: bench_user
+      DATA_SOURCE_PASS: bench_password
+    networks: [bench_network]
+
+  exporter_hl:
+    image: prometheuscommunity/postgres-exporter:v0.18.1
+    container_name: exporter_hl
+    environment:
+      DATA_SOURCE_URI: postgres_hl:5432/db_hl?sslmode=disable
+      DATA_SOURCE_USER: bench_user
+      DATA_SOURCE_PASS: bench_password
+    networks: [bench_network]
+
+  exporter_nt:
+    image: prometheuscommunity/postgres-exporter:v0.18.1
+    container_name: exporter_nt
+    environment:
+      DATA_SOURCE_URI: postgres_nt:5432/db_nt?sslmode=disable
+      DATA_SOURCE_USER: bench_user
+      DATA_SOURCE_PASS: bench_password
+    networks: [bench_network]
+
+  # CỤM KHOA (FACULTY)
+  backend_khoa:
+    build:
+      context: ./Khoa/app
+      dockerfile: Dockerfile
+    container_name: bench_backend_khoa
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./Khoa/app:/app
+    networks:
+      - bench_network
+    environment:
+      - PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus_multiproc
+    entrypoint: >
+      sh -c "rm -rf /tmp/prometheus_multiproc && mkdir -p /tmp/prometheus_multiproc && uvicorn main:app --host 0.0.0.0 --port 8000 --workers 8"
+    restart: unless-stopped
+
+  postgres_cntt:
+    image: postgres:15-alpine
+    container_name: bench_postgres_cntt
+    environment:
+      POSTGRES_DB: db_cntt
+      POSTGRES_USER: bench_user
+      POSTGRES_PASSWORD: bench_password
+    ports: ["5461:5432"]
+    networks: [bench_network]
+    command: postgres -c max_connections=300 -c shared_buffers=256MB
+
+  postgres_cb:
+    image: postgres:15-alpine
+    container_name: bench_postgres_cb
+    environment:
+      POSTGRES_DB: db_cb
+      POSTGRES_USER: bench_user
+      POSTGRES_PASSWORD: bench_password
+    ports: ["5462:5432"]
+    networks: [bench_network]
+    command: postgres -c max_connections=300 -c shared_buffers=256MB
+
+  postgres_nn:
+    image: postgres:15-alpine
+    container_name: bench_postgres_nn
+    environment:
+      POSTGRES_DB: db_nn
+      POSTGRES_USER: bench_user
+      POSTGRES_PASSWORD: bench_password
+    ports: ["5463:5432"]
+    networks: [bench_network]
+    command: postgres -c max_connections=300 -c shared_buffers=256MB
+
+  postgres_kt:
+    image: postgres:15-alpine
+    container_name: bench_postgres_kt
+    environment:
+      POSTGRES_DB: db_kt
+      POSTGRES_USER: bench_user
+      POSTGRES_PASSWORD: bench_password
+    ports: ["5464:5432"]
+    networks: [bench_network]
+    command: postgres -c max_connections=200 -c shared_buffers=256MB
+
+  postgres_dt:
+    image: postgres:15-alpine
+    container_name: bench_postgres_dt
+    environment:
+      POSTGRES_DB: db_dt
+      POSTGRES_USER: bench_user
+      POSTGRES_PASSWORD: bench_password
+    ports: ["5465:5432"]
+    networks: [bench_network]
+    command: postgres -c max_connections=200 -c shared_buffers=256MB
+
+  exporter_cntt:
+    image: prometheuscommunity/postgres-exporter:v0.18.1
+    container_name: exporter_cntt
+    environment:
+      DATA_SOURCE_URI: postgres_cntt:5432/db_cntt?sslmode=disable
+      DATA_SOURCE_USER: bench_user
+      DATA_SOURCE_PASS: bench_password
+    networks: [bench_network]
+
+  exporter_cb:
+    image: prometheuscommunity/postgres-exporter:v0.18.1
+    container_name: exporter_cb
+    environment:
+      DATA_SOURCE_URI: postgres_cb:5432/db_cb?sslmode=disable
+      DATA_SOURCE_USER: bench_user
+      DATA_SOURCE_PASS: bench_password
+    networks: [bench_network]
+
+  exporter_nn:
+    image: prometheuscommunity/postgres-exporter:v0.18.1
+    container_name: exporter_nn
+    environment:
+      DATA_SOURCE_URI: postgres_nn:5432/db_nn?sslmode=disable
+      DATA_SOURCE_USER: bench_user
+      DATA_SOURCE_PASS: bench_password
+    networks: [bench_network]
+
+  exporter_kt:
+    image: prometheuscommunity/postgres-exporter:v0.18.1
+    container_name: exporter_kt
+    environment:
+      DATA_SOURCE_URI: postgres_kt:5432/db_kt?sslmode=disable
+      DATA_SOURCE_USER: bench_user
+      DATA_SOURCE_PASS: bench_password
+    networks: [bench_network]
+
+  exporter_dt:
+    image: prometheuscommunity/postgres-exporter:v0.18.1
+    container_name: exporter_dt
+    environment:
+      DATA_SOURCE_URI: postgres_dt:5432/db_dt?sslmode=disable
+      DATA_SOURCE_USER: bench_user
+      DATA_SOURCE_PASS: bench_password
+    networks: [bench_network]
+
+networks:
+  bench_network:
+    driver: bridge

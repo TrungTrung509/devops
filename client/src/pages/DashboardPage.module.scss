@@ -1,0 +1,147 @@
+// Dashboard Page Styles
+@use '../styles/variables' as *;
+@use '../styles/mixins/responsive' as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+
+// Welcome Section
+
+.welcomeSection {
+  background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
+  border-radius: $radius-xl;
+  padding: 28px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  @include mobile {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+  }
+}
+
+.welcomeContent {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  @include mobile {
+    width: 100%;
+  }
+}
+
+.welcomeAvatar {
+  width: 64px;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.avatarInitial {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.welcomeText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.welcomeTitle {
+  color: #fff !important;
+  margin-bottom: 0 !important;
+  font-weight: 600 !important;
+  font-size: 20px !important;
+}
+
+.welcomeSubtitle {
+  color: rgba(255, 255, 255, 0.75) !important;
+  font-size: 14px !important;
+}
+
+
+// Stats Row
+
+.statsRow {
+  margin-bottom: 4px;
+}
+
+.statCard {
+  border-radius: $radius-lg !important;
+  height: 100%;
+
+  .ant-statistic-title {
+    color: $color-text-secondary;
+    font-size: 13px;
+  }
+
+  .ant-statistic-content {
+    font-size: 28px;
+  }
+
+  .ant-statistic-content-prefix {
+    margin-right: 8px;
+  }
+}
+
+
+// Info Card
+
+.infoCard {
+  border-radius: $radius-lg !important;
+
+  .ant-card-head {
+    border-radius: $radius-lg $radius-lg 0 0;
+    border-bottom-color: $color-border-secondary;
+  }
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.infoLabel {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.infoValue {
+  font-size: 15px;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+
+// Recent Card
+
+.recentCard {
+  border-radius: $radius-lg !important;
+
+  .ant-card-head {
+    border-radius: $radius-lg $radius-lg 0 0;
+    border-bottom-color: $color-border-secondary;
+  }
+}
+
+.recentTable {
+  .ant-table {
+    border-radius: $radius-md;
+  }
+}

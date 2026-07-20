@@ -1,0 +1,111 @@
+{
+  "index_patterns": ["hocphan-*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "analysis": {
+        "analyzer": {
+          "vietnamese_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "lowercase",
+              "asciifolding"
+            ]
+          }
+        },
+        "normalizer": {
+          "lowercase_normalizer": {
+            "type": "custom",
+            "filter": ["lowercase", "asciifolding"]
+          }
+        }
+      }
+    },
+    "mappings": {
+      "properties": {
+        "MaHP": {
+          "type": "keyword",
+          "copy_to": "search_text"
+        },
+        "TenHP": {
+          "type": "text",
+          "analyzer": "vietnamese_analyzer",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "normalizer": "lowercase_normalizer"
+            },
+            "suggest": {
+              "type": "completion"
+            }
+          }
+        },
+        "SoTinChi": {
+          "type": "integer"
+        },
+        "SoTietLyThuyet": {
+          "type": "integer"
+        },
+        "SoTietThucHanh": {
+          "type": "integer"
+        },
+        "LoaiHocPhan": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text"
+            }
+          }
+        },
+        "MaKhoa": {
+          "type": "keyword",
+          "copy_to": "search_text"
+        },
+        "TenKhoa": {
+          "type": "text",
+          "analyzer": "vietnamese_analyzer",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            }
+          }
+        },
+        "MoTa": {
+          "type": "text",
+          "analyzer": "vietnamese_analyzer"
+        },
+        "TrangThai": {
+          "type": "keyword"
+        },
+        "NgayTao": {
+          "type": "date",
+          "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+        },
+        "search_text": {
+          "type": "text",
+          "analyzer": "vietnamese_analyzer"
+        },
+        "suggest": {
+          "type": "completion",
+          "analyzer": "simple",
+          "preserve_separators": true,
+          "preserve_position_increments": true,
+          "max_input_length": 50
+        }
+      }
+    },
+    "aliases": {
+      "hocphan_search": {}
+    }
+  },
+  "priority": 100,
+  "composed_of": [],
+  "_meta": {
+    "description": "Index template for HocPhan (Course) documents with Vietnamese search support",
+    "version": "1.0.0",
+    "created_date": "2026-04-04",
+    "tables": ["HocPhan", "Khoa"]
+  }
+}

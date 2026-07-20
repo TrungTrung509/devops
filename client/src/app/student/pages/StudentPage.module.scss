@@ -1,0 +1,141 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins/responsive' as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.welcomeSection {
+  background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
+  border-radius: $radius-lg;
+  padding: 28px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.25);
+}
+
+.welcomeContent {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.welcomeAvatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.avatarInitial {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  font-family: Inter, sans-serif;
+}
+
+.welcomeText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.welcomeTitle {
+  color: #fff !important;
+  margin: 0 !important;
+  font-weight: 700 !important;
+}
+
+.welcomeSubtitle {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.statsRow {
+  width: 100%;
+}
+
+.statCard {
+  border-radius: $radius-lg !important;
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.infoCard {
+  border-radius: $radius-lg !important;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.infoLabel {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #8c8c8c;
+}
+
+.infoValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.recentCard {
+  border-radius: $radius-lg !important;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pageTitle {
+  margin-bottom: 4px !important;
+  font-weight: 600 !important;
+}
+
+.viewToggle {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.filterCard {
+  border-radius: $radius-lg !important;
+
+  :global(.ant-card-body) {
+    padding: 16px;
+  }
+}
+
+.tableCard {
+  border-radius: $radius-lg !important;
+  overflow: hidden;
+
+  :global(.ant-table-thead > tr > th) {
+    background: #fafafa !important;
+  }
+}
+
+.recentTable {
+  :global(.ant-table-thead > tr > th) {
+    background: #fafafa !important;
+  }
+}

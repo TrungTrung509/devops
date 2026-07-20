@@ -1,0 +1,20 @@
+# Python virtual environments
+seeds/.venv/
+**/__pycache__/
+**/*.pyc
+
+# IDE
+.idea/
+**/.idea/
+.vscode/
+
+# Docker environment secrets (KHÔNG commit .env, chỉ commit env.example)
+docker/.env
+
+# Node
+client/node_modules/
+client/dist/
+
+# Misc
+my-folder/
+ONBOARDING.md

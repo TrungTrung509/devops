@@ -1,0 +1,62 @@
+// Admin Failover Page Styles
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins/responsive' as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pageTitle {
+  margin-bottom: 4px !important;
+  font-weight: 600 !important;
+}
+
+.card {
+  border-radius: $radius-lg !important;
+}
+
+.primarySite {
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: $color-text-secondary;
+  margin-bottom: 12px !important;
+}
+
+.siteCard {
+  border-radius: $radius-md !important;
+  border: 1px solid $color-border-secondary;
+  transition: all $transition-fast;
+
+  &:hover {
+    box-shadow: $shadow-sm;
+  }
+}
+
+.primaryCard {
+  border-color: $color-primary !important;
+  background: rgba(22, 119, 255, 0.03);
+}
+
+.siteInfo {
+  margin-top: 8px;
+}
+
+.actions {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid $color-border-secondary;
+}

@@ -1,0 +1,191 @@
+/* EntityOverviewDashboard Styles */
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 4px 0;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.iconBox {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.refreshBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #595959;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.refreshBtn:hover {
+  border-color: #1677ff;
+  color: #1677ff;
+}
+
+/* ── Total Card ─────────────────────────────────────────── */
+.totalCard {
+  border-radius: 12px !important;
+  border: 1px solid #f0f0f0 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+  height: 100%;
+}
+
+.summaryCard {
+  border-radius: 12px !important;
+  border: 1px solid #f0f0f0 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+  height: 100%;
+}
+
+/* ── Site Cards ─────────────────────────────────────────── */
+.siteCard {
+  border-radius: 12px !important;
+  border: 1px solid #f0f0f0 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+  transition: box-shadow 0.2s, transform 0.2s;
+  height: 100%;
+}
+
+.siteCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-1px);
+}
+
+.siteCardInner {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.siteCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.siteName {
+  font-size: 13px;
+  color: #262626;
+}
+
+.siteCardStats {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.siteCount {
+  margin: 0 !important;
+  line-height: 1.2 !important;
+}
+
+.siteProgress {
+  margin: 2px 0 0 !important;
+}
+
+.sitePercent {
+  font-size: 12px;
+}
+
+/* ── Section Cards ──────────────────────────────────────── */
+.sectionCard {
+  border-radius: 12px !important;
+  border: 1px solid #f0f0f0 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+}
+
+.sectionCard :global(.ant-card-head) {
+  min-height: unset;
+  padding: 12px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.sectionCard :global(.ant-card-head-title) {
+  padding: 0;
+  font-size: 14px;
+}
+
+/* ── Status Items ───────────────────────────────────────── */
+.statusItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #fafafa;
+}
+
+.statusItem:last-child {
+  border-bottom: none;
+}
+
+/* ── Extra Items ───────────────────────────────────────── */
+.extraItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #fafafa;
+}
+
+.extraItem:last-child {
+  border-bottom: none;
+}
+
+.extraRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Table Card ─────────────────────────────────────────── */
+.tableCard {
+  border-radius: 12px !important;
+  border: 1px solid #f0f0f0 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+  overflow: hidden;
+}
+
+/* ── Mini site ──────────────────────────────────────────── */
+.miniSite {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}

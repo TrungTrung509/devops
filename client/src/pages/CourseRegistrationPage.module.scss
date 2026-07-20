@@ -1,0 +1,196 @@
+// Course Registration Page Styles
+@use '../styles/variables' as *;
+@use '../styles/mixins/responsive' as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+
+// Page Header
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pageTitle {
+  margin-bottom: 4px !important;
+  font-weight: 600 !important;
+}
+
+
+// Filter Card
+
+.filterCard {
+  border-radius: $radius-lg !important;
+
+  .ant-card-body {
+    padding: 16px;
+  }
+}
+
+.filterCount {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+
+// Table Cards
+
+.sectionCard,
+.enrollmentCard {
+  border-radius: $radius-lg !important;
+  overflow: hidden;
+
+  .ant-card-head {
+    min-height: 48px;
+    background: transparent;
+    border-bottom: 1px solid $color-border-secondary;
+
+    .ant-card-head-title {
+      font-weight: $font-weight-semibold;
+      font-size: 15px;
+    }
+  }
+
+  .ant-card-body {
+    padding: 0;
+  }
+}
+
+
+// Table Overrides
+
+:global {
+  .ant-table-wrapper {
+    .ant-table {
+      border-radius: 0;
+    }
+
+    .ant-table-pagination {
+      padding: 12px 16px;
+      margin: 0;
+      border-top: 1px solid $color-border-secondary;
+      background: #fafafa;
+    }
+
+    .ant-table-column-sorter {
+      color: #bfbfbf;
+    }
+
+    .ant-table-row-even > td {
+      background: #fafafa;
+    }
+  }
+}
+
+
+// Register Button
+
+.registerBtn {
+  font-size: 12px;
+  padding: 0 8px;
+  height: 28px;
+  border-radius: 6px;
+}
+
+
+// SiSo Cell
+
+.siSoCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.siSoIcon {
+  color: $color-text-tertiary;
+  font-size: 12px;
+}
+
+
+// Register Modal
+
+.registerModal {
+  .ant-modal-content {
+    border-radius: $radius-xl;
+    overflow: hidden;
+  }
+
+  .ant-modal-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid $color-border-secondary;
+  }
+
+  .ant-modal-body {
+    padding: 24px;
+  }
+}
+
+.modalSectionInfo {
+  background: $color-bg-base;
+  border-radius: $radius-md;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid $color-border-secondary;
+
+  .ant-col {
+    padding-bottom: 8px !important;
+  }
+
+  .ant-typography-secondary {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    display: block;
+    margin-bottom: 2px;
+  }
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+
+// Responsive
+
+@include mobile {
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  :global(.ant-table-wrapper) {
+    .ant-table {
+      font-size: 12px;
+    }
+
+    .ant-table-cell {
+      padding: 8px 4px !important;
+    }
+  }
+}
+
+@include tablet {
+  :global(.ant-table-wrapper) {
+    .ant-table-scroll {
+      overflow-x: auto;
+
+      .ant-table {
+        min-width: 900px;
+      }
+    }
+  }
+}

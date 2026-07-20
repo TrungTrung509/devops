@@ -1,0 +1,101 @@
+@use '@/styles/variables' as *;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+// ── Course card ─────────────────────────────────────────────────
+.courseCard {
+  border-radius: $radius-md;
+  height: 100%;
+
+  :global(.ant-card-head) {
+    min-height: 40px;
+    padding: 8px 12px;
+  }
+
+  :global(.ant-card-body) {
+    padding: 8px 12px;
+  }
+}
+
+.courseMeta {
+  margin-bottom: 0;
+}
+
+// ── Schedule entry ─────────────────────────────────────────────
+.scheduleList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scheduleEntry {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+
+  &:hover {
+    background: #f5f5f5;
+    border-color: #e8e8e8;
+  }
+}
+
+.periodBadge {
+  flex-shrink: 0;
+  min-width: 80px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.scheduleEntryBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.scheduleRow1 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scheduleRow2 {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.scheduleRow3 {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

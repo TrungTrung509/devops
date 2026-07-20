@@ -1,0 +1,128 @@
+// Global Styles
+@use './variables' as *;
+@use './mixins/responsive' as *;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  color: $color-text-primary;
+  background-color: $color-bg-layout;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100%;
+}
+
+a {
+  color: $color-primary;
+  text-decoration: none;
+
+  &:hover {
+    color: $color-primary-dark;
+  }
+}
+
+
+// Ant Design Overrides
+
+.ant-layout {
+  background: $color-bg-layout !important;
+}
+
+.ant-layout-sider {
+  background: linear-gradient(180deg, #001529 0%, #003a70 100%) !important;
+}
+
+.ant-menu-dark {
+  background: transparent !important;
+}
+
+.ant-card {
+  border-radius: $radius-lg !important;
+}
+
+.ant-table-wrapper {
+  .ant-table {
+    border-radius: $radius-md;
+    overflow: hidden;
+  }
+
+  .ant-table-thead > tr > th {
+    background: #fafafa !important;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .ant-table-tbody > tr:hover > td {
+    background: #fafafa !important;
+  }
+}
+
+.ant-btn-primary {
+  box-shadow: 0 2px 4px rgba(22, 119, 255, 0.2);
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(22, 119, 255, 0.3);
+  }
+}
+
+.ant-input:focus,
+.ant-input-focused,
+.ant-select-focused .ant-select-selector {
+  border-color: $color-primary !important;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1) !important;
+}
+
+.ant-notification-notice {
+  border-radius: $radius-lg !important;
+}
+
+
+// Utility Classes
+
+.page-container {
+  padding: $spacing-lg;
+  max-width: $content-max-width;
+  margin: 0 auto;
+}
+
+.section-title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-lg;
+}
+
+.card-section {
+  background: $color-bg-container;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-sm;
+  border: 1px solid $color-border-secondary;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -1,0 +1,8 @@
+{
+  "current_primary_site": "HADONG",
+  "previous_primary_site": null,
+  "last_failover_mode": "default",
+  "last_failover_reason": null,
+  "last_failover_at": null,
+  "auto_failover_enabled": true
+}

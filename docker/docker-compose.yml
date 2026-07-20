@@ -1,0 +1,631 @@
+# DOCKER COMPOSE - CƠ SỞ DỮ LIỆU PHÂN TÁN
+# Đề tài: Hệ thống đăng ký học phần nhiều cơ sở
+
+name: csdlpt
+
+services:
+  backend:
+    build:
+      context: ../app
+      dockerfile: Dockerfile
+    container_name: csdlpt_backend
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      DATABASE_URL: postgresql://${HADONG_USER:-csdlpt_user}:${HADONG_PASSWORD:-csdlpt_pass}@postgres_hadong:5432/${HADONG_DB:-csdlpt_hadong}
+      HADONG_URL: postgresql://${HADONG_USER:-csdlpt_user}:${HADONG_PASSWORD:-csdlpt_pass}@postgres_hadong:5432/${HADONG_DB:-csdlpt_hadong}
+      NGOCTRUC_URL: postgresql://${NGOCTRUC_USER:-csdlpt_user}:${NGOCTRUC_PASSWORD:-csdlpt_pass}@postgres_ngoctruc:5432/${NGOCTRUC_DB:-csdlpt_ngoctruc}
+      HOALAC_URL: postgresql://${HOALAC_USER:-csdlpt_user}:${HOALAC_PASSWORD:-csdlpt_pass}@postgres_hoalac:5432/${HOALAC_DB:-csdlpt_hoalac}
+      SECRET_KEY: ${SECRET_KEY:-my_super_secret_key_123}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      REMOTE_BENCH_DELAY_MS: ${REMOTE_BENCH_DELAY_MS:-120}
+      WATCHFILES_FORCE_POLLING: "true"
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9094
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ../app:/app
+      - ../scripts:/app/scripts:ro
+      - ../search:/app/search:ro
+    networks:
+      - csdlpt_network
+    depends_on:
+      postgres_hadong:
+        condition: service_healthy
+      postgres_ngoctruc:
+        condition: service_healthy
+      postgres_hoalac:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # FRONTEND - Vite React Dev Server
+
+  frontend:
+    image: node:20-alpine
+    container_name: csdlpt_frontend
+    working_dir: /app
+    command: sh -c "npm install --prefer-offline && npm run dev"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ../client:/app
+      - node_modules_cache:/app/node_modules
+    networks:
+      - csdlpt_network
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
+
+  # SITE HADONG (Hà Nội) - PUBLISHER
+
+  postgres_hadong:
+    image: postgres:15-alpine
+    container_name: csdlpt_hadong
+    environment:
+      POSTGRES_DB: ${HADONG_DB:-csdlpt_hadong}
+      POSTGRES_USER: ${HADONG_USER:-csdlpt_user}
+      POSTGRES_PASSWORD: ${HADONG_PASSWORD:-csdlpt_pass}
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+    command:
+      - postgres
+      - "-c"
+      - wal_level=logical
+      - "-c"
+      - max_replication_slots=10
+      - "-c"
+      - max_wal_senders=10
+      - "-c"
+      - wal_keep_size=1GB
+    ports:
+      - "${HADONG_PORT:-5432}:5432"
+    volumes:
+      - postgres_hadong_data:/var/lib/postgresql/data
+    networks:
+      - csdlpt_network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${HADONG_USER:-csdlpt_user} -d ${HADONG_DB:-csdlpt_hadong}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # SITE NGOCTRUC (Ngọc Trục) - SUBSCRIBER
+
+  postgres_ngoctruc:
+    image: postgres:15-alpine
+    container_name: csdlpt_ngoctruc
+    environment:
+      POSTGRES_DB: ${NGOCTRUC_DB:-csdlpt_ngoctruc}
+      POSTGRES_USER: ${NGOCTRUC_USER:-csdlpt_user}
+      POSTGRES_PASSWORD: ${NGOCTRUC_PASSWORD:-csdlpt_pass}
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+    command:
+      - postgres
+      - "-c"
+      - wal_level=logical
+      - "-c"
+      - max_replication_slots=10
+      - "-c"
+      - max_wal_senders=10
+      - "-c"
+      - wal_keep_size=1GB
+    depends_on:
+      postgres_hadong:
+        condition: service_healthy
+    ports:
+      - "${NGOCTRUC_PORT:-5433}:5432"
+    volumes:
+      - postgres_ngoctruc_data:/var/lib/postgresql/data
+    networks:
+      - csdlpt_network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${NGOCTRUC_USER:-csdlpt_user} -d ${NGOCTRUC_DB:-csdlpt_ngoctruc}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # SITE HOALAC (Hòa Lạc) - SUBSCRIBER
+
+  postgres_hoalac:
+    image: postgres:15-alpine
+    container_name: csdlpt_hoalac
+    environment:
+      POSTGRES_DB: ${HOALAC_DB:-csdlpt_hoalac}
+      POSTGRES_USER: ${HOALAC_USER:-csdlpt_user}
+      POSTGRES_PASSWORD: ${HOALAC_PASSWORD:-csdlpt_pass}
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+    command:
+      - postgres
+      - "-c"
+      - wal_level=logical
+      - "-c"
+      - max_replication_slots=10
+      - "-c"
+      - max_wal_senders=10
+      - "-c"
+      - wal_keep_size=1GB
+    depends_on:
+      postgres_hadong:
+        condition: service_healthy
+    ports:
+      - "${HOALAC_PORT:-5434}:5432"
+    volumes:
+      - postgres_hoalac_data:/var/lib/postgresql/data
+    networks:
+      - csdlpt_network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${HOALAC_USER:-csdlpt_user} -d ${HOALAC_DB:-csdlpt_hoalac}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # POSTGRESQL TẬP TRUNG - Dùng cho Benchmark so sánh tập trung/phân tán
+
+  postgres_centralized:
+    image: postgres:15-alpine
+    container_name: csdlpt_centralized
+    environment:
+      POSTGRES_DB: ${CENTRALIZED_DB:-csdlpt_centralized}
+      POSTGRES_USER: ${CENTRALIZED_USER:-csdlpt_user}
+      POSTGRES_PASSWORD: ${CENTRALIZED_PASSWORD:-csdlpt_pass}
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+    ports:
+      - "${CENTRALIZED_PORT:-5435}:5432"
+    volumes:
+      - postgres_centralized_data:/var/lib/postgresql/data
+    networks:
+      - csdlpt_network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${CENTRALIZED_USER:-csdlpt_user} -d ${CENTRALIZED_DB:-csdlpt_centralized}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # FDW BOOTSTRAP - Cau hinh ket noi lien site va views tong hop
+
+  fdw_setup:
+    image: postgres:15-alpine
+    container_name: csdlpt_fdw_setup
+    command: ["sh", "-c", "tr -d '\\r' < /scripts/setup-fdw.sh > /tmp/setup-fdw.sh && sh /tmp/setup-fdw.sh"]
+    environment:
+      HADONG_DB: ${HADONG_DB:-csdlpt_hadong}
+      HADONG_USER: ${HADONG_USER:-csdlpt_user}
+      HADONG_PASSWORD: ${HADONG_PASSWORD:-csdlpt_pass}
+      NGOCTRUC_DB: ${NGOCTRUC_DB:-csdlpt_ngoctruc}
+      NGOCTRUC_USER: ${NGOCTRUC_USER:-csdlpt_user}
+      NGOCTRUC_PASSWORD: ${NGOCTRUC_PASSWORD:-csdlpt_pass}
+      HOALAC_DB: ${HOALAC_DB:-csdlpt_hoalac}
+      HOALAC_USER: ${HOALAC_USER:-csdlpt_user}
+      HOALAC_PASSWORD: ${HOALAC_PASSWORD:-csdlpt_pass}
+    volumes:
+      - ../docker/fdw/setup-fdw.sh:/scripts/setup-fdw.sh:ro
+      - ../sql:/sql:ro
+    networks:
+      - csdlpt_network
+    depends_on:
+      postgres_hadong:
+        condition: service_healthy
+      postgres_ngoctruc:
+        condition: service_healthy
+      postgres_hoalac:
+        condition: service_healthy
+    restart: "no"
+
+  # REDIS - Cache Layer
+
+  redis:
+    image: redis:7-alpine
+    container_name: csdlpt_redis
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - csdlpt_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ELASTICSEARCH - Search Engine
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: csdlpt_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.name=csdlpt-cluster
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "${ES_PORT:-9200}:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - csdlpt_network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  # KIBANA - Dashboard & Visualization
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: csdlpt_kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - SERVER_NAME=csdlpt-kibana
+      - SERVER_HOST=0.0.0.0
+    ports:
+      - "${KIBANA_PORT:-5601}:5601"
+    networks:
+      - csdlpt_network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # MONITORING - PROMETHEUS + GRAFANA + EXPORTERS
+
+  postgres_hadong_exporter:
+    image: prometheuscommunity/postgres-exporter:v0.18.1
+    container_name: csdlpt_postgres_hadong_exporter
+    environment:
+      DATA_SOURCE_URI: postgres_hadong:5432/${HADONG_DB:-csdlpt_hadong}?sslmode=disable
+      DATA_SOURCE_USER: ${HADONG_USER:-csdlpt_user}
+      DATA_SOURCE_PASS: ${HADONG_PASSWORD:-csdlpt_pass}
+      PG_EXPORTER_AUTO_DISCOVER_DATABASES: "false"
+    networks:
+      - csdlpt_network
+    depends_on:
+      postgres_hadong:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres_ngoctruc_exporter:
+    image: prometheuscommunity/postgres-exporter:v0.18.1
+    container_name: csdlpt_postgres_ngoctruc_exporter
+    environment:
+      DATA_SOURCE_URI: postgres_ngoctruc:5432/${NGOCTRUC_DB:-csdlpt_ngoctruc}?sslmode=disable
+      DATA_SOURCE_USER: ${NGOCTRUC_USER:-csdlpt_user}
+      DATA_SOURCE_PASS: ${NGOCTRUC_PASSWORD:-csdlpt_pass}
+      PG_EXPORTER_AUTO_DISCOVER_DATABASES: "false"
+    networks:
+      - csdlpt_network
+    depends_on:
+      postgres_ngoctruc:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres_hoalac_exporter:
+    image: prometheuscommunity/postgres-exporter:v0.18.1
+    container_name: csdlpt_postgres_hoalac_exporter
+    environment:
+      DATA_SOURCE_URI: postgres_hoalac:5432/${HOALAC_DB:-csdlpt_hoalac}?sslmode=disable
+      DATA_SOURCE_USER: ${HOALAC_USER:-csdlpt_user}
+      DATA_SOURCE_PASS: ${HOALAC_PASSWORD:-csdlpt_pass}
+      PG_EXPORTER_AUTO_DISCOVER_DATABASES: "false"
+    networks:
+      - csdlpt_network
+    depends_on:
+      postgres_hoalac:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis_exporter:
+    image: oliver006/redis_exporter:v1.82.0
+    container_name: csdlpt_redis_exporter
+    environment:
+      REDIS_ADDR: redis://redis:6379
+    networks:
+      - csdlpt_network
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  cadvisor:
+    image: ghcr.io/google/cadvisor:0.56.2
+    container_name: csdlpt_cadvisor
+    command:
+      - --docker_only=true
+      - --housekeeping_interval=30s
+    ports:
+      - "${CADVISOR_PORT:-8085}:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+    networks:
+      - csdlpt_network
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: csdlpt_prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - csdlpt_network
+    depends_on:
+      backend:
+        condition: service_started
+      cadvisor:
+        condition: service_started
+      postgres_hadong_exporter:
+        condition: service_started
+      postgres_ngoctruc_exporter:
+        condition: service_started
+      postgres_hoalac_exporter:
+        condition: service_started
+      redis_exporter:
+        condition: service_started
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:12.1.1
+    container_name: csdlpt_grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin123}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SERVER_ROOT_URL: http://localhost:${GRAFANA_PORT:-3001}
+    ports:
+      - "${GRAFANA_PORT:-3001}:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - csdlpt_network
+    depends_on:
+      prometheus:
+        condition: service_started
+    restart: unless-stopped
+
+  k6:
+    image: grafana/k6:latest
+    container_name: csdlpt_k6
+    profiles: ["benchmark"]
+    command: run /scripts/course-comparison.js
+    environment:
+      BENCH_BASE_URL: ${BENCH_BASE_URL:-http://backend:8000}
+      BENCH_USERNAME: ${BENCH_USERNAME:-}
+      BENCH_PASSWORD: ${BENCH_PASSWORD:-}
+      BENCH_TARGET_SITE: ${BENCH_TARGET_SITE:-HADONG}
+      BENCH_VUS: ${BENCH_VUS:-10}
+      BENCH_ITERATIONS: ${BENCH_ITERATIONS:-100}
+      BENCH_REMOTE_ITERATIONS: ${BENCH_REMOTE_ITERATIONS:-100}
+    volumes:
+      - ./k6:/scripts:ro
+    working_dir: /scripts
+    networks:
+      - csdlpt_network
+    depends_on:
+      backend:
+        condition: service_started
+    restart: "no"
+
+  # KAFKA - Message Broker (KRaft Mode)
+
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: csdlpt_kafka
+    # Official image runs as uid 1000 (appuser); on some Docker Desktop setups
+    # the named volume is created root-owned, so Kafka cannot format KRaft logs.
+    user: "0:0"
+    ports:
+      - "${KAFKA_PORT:-9092}:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,INTERNAL://0.0.0.0:9094,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,INTERNAL://kafka:9094
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_LOG_DIRS: /tmp/kafka-logs
+    volumes:
+      - kafka_data:/tmp/kafka-logs
+    networks:
+      - csdlpt_network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list",
+        ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  # KAFKA UI - Kafka Cluster Management
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: csdlpt_kafka_ui
+    ports:
+      - "${KAFKA_UI_PORT:-8090}:8080"
+    environment:
+      - DYNAMIC_CONFIG_ENABLED=true
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9094
+    networks:
+      - csdlpt_network
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # KAFKA CONNECT - Data Integration (Debezium + ES Sink)
+
+  kafka-connect:
+    image: confluentinc/cp-kafka-connect:7.5.0
+    container_name: csdlpt_kafka_connect
+    ports:
+      - "${KAFKA_CONNECT_PORT:-8083}:8083"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: "kafka:9094"
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: "csdlpt-connect-group"
+      CONNECT_CONFIG_STORAGE_TOPIC: "csdlpt-connect-configs"
+      CONNECT_OFFSET_STORAGE_TOPIC: "csdlpt-connect-offsets"
+      CONNECT_STATUS_STORAGE_TOPIC: "csdlpt-connect-status"
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_REST_ADVERTISED_HOST_NAME: "kafka-connect"
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+    volumes:
+      - kafka_connect_plugins:/usr/share/confluent-hub-components
+    command:
+      - bash
+      - -c
+      - |
+        echo "Checking/Installing Connector plugins..."
+        if [ ! -d "/usr/share/confluent-hub-components/debezium-debezium-connector-postgresql" ]; then
+          confluent-hub install --no-prompt debezium/debezium-connector-postgresql:2.4.2
+        fi
+        if [ ! -d "/usr/share/confluent-hub-components/confluentinc-kafka-connect-elasticsearch" ]; then
+          confluent-hub install --no-prompt confluentinc/kafka-connect-elasticsearch:15.1.2
+        fi
+        echo "Starting Kafka Connect..."
+        /etc/confluent/docker/run
+    networks:
+      - csdlpt_network
+    depends_on:
+      kafka:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  kafka-setup:
+    image: alpine:latest
+    container_name: csdlpt_kafka_setup
+    volumes:
+      - ../scripts/setup_debezium_connectors.sh:/setup.sh
+    # Cài curl và chạy script. Truyền 'kafka-connect' làm host để script gọi đúng API trong mạng Docker.
+    entrypoint:
+      ["sh", "-c", "apk add --no-cache curl jq && tr -d '\\r' < /setup.sh > /tmp/setup.sh && sh /tmp/setup.sh kafka-connect"]
+    networks:
+      - csdlpt_network
+    depends_on:
+      kafka-connect:
+        condition: service_started
+    restart: "no"
+
+  # KAFKA TOPIC INIT - Tạo các topic với số partition phù hợp
+  kafka-topic-init:
+    image: apache/kafka:3.7.0
+    container_name: csdlpt_kafka_topic_init
+    user: "0:0"
+    entrypoint:
+      - "sh"
+      - "-c"
+      - |
+        echo "Creating Kafka topics..."
+        /opt/kafka/bin/kafka-topics.sh \
+          --bootstrap-server kafka:9094 \
+          --create --if-not-exists \
+          --topic registration_requests \
+          --partitions 8 \
+          --replication-factor 1
+        /opt/kafka/bin/kafka-topics.sh \
+          --bootstrap-server kafka:9094 \
+          --create --if-not-exists \
+          --topic registration_replies \
+          --partitions 1 \
+          --replication-factor 1
+        echo "Topics created successfully:"
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9094 --describe --topic registration_requests
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9094 --describe --topic registration_replies
+    networks:
+      - csdlpt_network
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: "no"
+
+# NETWORKS
+
+networks:
+  csdlpt_network:
+    driver: bridge
+
+# VOLUMES
+
+volumes:
+  postgres_hadong_data:
+  postgres_ngoctruc_data:
+  postgres_hoalac_data:
+  postgres_centralized_data:
+  redis_data:
+  elasticsearch_data:
+  prometheus_data:
+  grafana_data:
+  kafka_data:
+  kafka_connect_plugins:
+  node_modules_cache:

@@ -1,0 +1,120 @@
+// Admin Dashboard Page Styles
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins/responsive' as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// Welcome Section
+.welcomeSection {
+  background: linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%);
+  border-radius: $radius-xl;
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  @include mobile {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.welcomeContent {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  @include mobile {
+    width: 100%;
+  }
+}
+
+.welcomeIcon {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.welcomeTitle {
+  color: #fff !important;
+  margin-bottom: 4px !important;
+  font-weight: 600 !important;
+  font-size: 20px !important;
+}
+
+.welcomeSubtitle {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 14px !important;
+}
+
+// Stats Row
+.statsRow {
+  margin-bottom: 0;
+}
+
+.statCard {
+  border-radius: $radius-lg !important;
+  height: 100%;
+
+  :global(.ant-statistic-title) {
+    color: $color-text-secondary;
+    font-size: 13px;
+  }
+
+  :global(.ant-statistic-content) {
+    font-size: 26px;
+  }
+}
+
+// Module Cards
+.moduleCard {
+  border-radius: $radius-lg !important;
+}
+
+.moduleItem {
+  border-radius: $radius-md !important;
+  text-align: center;
+  padding: 12px 8px;
+  border: 1px solid $color-border-secondary;
+  transition: all $transition-base;
+
+  &:hover {
+    border-color: $color-primary !important;
+    box-shadow: $shadow-md;
+    transform: translateY(-2px);
+  }
+}
+
+.moduleIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin: 0 auto 8px;
+}
+
+.moduleName {
+  font-size: 13px;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  display: block;
+}
+
+// Recent Card
+.recentCard {
+  border-radius: $radius-lg !important;
+}

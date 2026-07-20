@@ -1,0 +1,39 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["prometheus:9090"]
+
+  - job_name: backend
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["backend:8000"]
+        labels:
+          app: csdlpt-backend
+
+  - job_name: cadvisor
+    static_configs:
+      - targets: ["cadvisor:8080"]
+        labels:
+          app: csdlpt-containers
+
+  - job_name: postgres
+    static_configs:
+      - targets: ["postgres_hadong_exporter:9187"]
+        labels:
+          site: HADONG
+      - targets: ["postgres_ngoctruc_exporter:9187"]
+        labels:
+          site: NGOCTRUC
+      - targets: ["postgres_hoalac_exporter:9187"]
+        labels:
+          site: HOALAC
+
+  - job_name: redis
+    static_configs:
+      - targets: ["redis_exporter:9121"]
+        labels:
+          app: csdlpt-redis
